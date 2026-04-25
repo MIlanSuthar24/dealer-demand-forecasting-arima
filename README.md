@@ -1,35 +1,36 @@
-# Commercial Vehicle Dealer Demand Forecasting
+# Commercial Vehicle Dealer Demand Forecasting using ARIMA
 
 ## Project Overview
 
-This project focuses on forecasting future dealer demand for a commercial vehicle distribution network using time series analytics. The objective was to build a reliable forecasting solution that helps optimize inventory allocation, reduce stock shortages, and improve supply chain planning.
+This project focuses on forecasting future dealer demand for a commercial vehicle distribution network using **Time Series Analytics**. The objective is to build a reliable forecasting solution that helps optimize inventory allocation, reduce stock shortages, and improve supply chain planning.
 
-A public multi-location sales dataset was adapted into a dealer demand forecasting business case to simulate real-world dealership planning scenarios.
+A public multi-location sales dataset was transformed into a **Commercial Vehicle Dealer Demand Forecasting** business case to simulate real-world dealership operations.
 
 ---
 
 ## Business Problem Statement
 
-Companies with large dealer networks often struggle to estimate future demand accurately. Poor forecasting can lead to:
+Companies with large dealer networks often face challenges in estimating future demand accurately. Poor forecasting can lead to:
 
-* Excess inventory and high holding costs
-* Stock shortages and lost sales
-* Delays in logistics and dispatch
-* Inefficient production planning
-* Poor dealer allocation decisions
+- Excess inventory and high holding costs  
+- Stock shortages and lost sales  
+- Delays in logistics and dispatch  
+- Inefficient production planning  
+- Poor dealer allocation decisions  
 
-This project solves the problem by predicting future monthly dealer demand using historical demand trends.
+This project solves the problem by predicting future monthly dealer demand using historical sales trends.
 
 ---
 
 ## Project Objective
 
-Develop an end-to-end forecasting model to predict monthly dealer demand and support:
+Develop an end-to-end forecasting model to predict future monthly dealer demand and support:
 
-* Inventory planning
-* Dealer stock allocation
-* Supply chain optimization
-* Management decision-making
+- Inventory Planning  
+- Dealer Stock Allocation  
+- Supply Chain Optimization  
+- Production Scheduling  
+- Management Decision-Making  
 
 ---
 
@@ -37,96 +38,143 @@ Develop an end-to-end forecasting model to predict monthly dealer demand and sup
 
 **Source:** Walmart Store Sales Forecasting Dataset (Kaggle)
 
-The dataset was restructured for this business case as follows:
+The dataset was restructured into an automotive business use case:
 
 | Original Column | Business Interpretation |
-| --------------- | ----------------------- |
-| Store           | Dealer_ID               |
-| Dept            | Vehicle Segment         |
-| Weekly_Sales    | Demand Units            |
-| Type            | Dealer Category         |
-| Size            | Dealer Capacity         |
-| IsHoliday       | Seasonal Indicator      |
+|----------------|-------------------------|
+| Store | Dealer_ID |
+| Dept | Vehicle_Segment |
+| Weekly_Sales | Demand_Units |
+| Type | Dealer_Category |
+| Size | Dealer_Capacity |
+| IsHoliday | Seasonal_Indicator |
 
-Files Used:
+### Files Used
 
-* train.csv
-* stores.csv
-* features.csv
+- `train.csv`
+- `stores.csv`
+- `features.csv`
 
 ---
 
 ## Tools & Technologies
 
-* Python
-* Pandas
-* NumPy
-* Matplotlib
-* Seaborn
-* Statsmodels
-* Scikit-learn
-* Google Colab
+- Python  
+- Pandas  
+- NumPy  
+- Matplotlib  
+- Seaborn  
+- Statsmodels  
+- Scikit-learn  
+- Joblib  
+- Google Colab  
 
 ---
 
 ## Project Workflow
 
-1. Data loading and merging
-2. Data cleaning and preprocessing
-3. Exploratory Data Analysis (EDA)
-4. Monthly demand aggregation
-5. Forecasting model development
-6. Model comparison and evaluation
-7. Future demand forecasting
-8. Business recommendations
+1. Data Loading  
+2. Data Merging & Transformation  
+3. Data Cleaning  
+4. Exploratory Data Analysis (EDA)  
+5. Outlier Detection & Treatment using IQR  
+6. Monthly Demand Aggregation  
+7. Stationarity Test (ADF Test)  
+8. Train-Test Split  
+9. Forecasting Model Development  
+10. Model Comparison & Evaluation  
+11. Future Demand Forecasting  
+12. Business Recommendations  
+
+---
+
+## Exploratory Data Analysis
+
+Key analysis performed:
+
+- Demand trend over time  
+- Dealer category demand comparison  
+- Seasonal demand pattern detection  
+- Demand distribution analysis  
+
+### Key Findings
+
+- Demand remained stable with periodic spikes  
+- Category A dealers handled higher demand volumes  
+- Seasonal events impacted demand surges  
+- Demand data showed right-skewness with outliers  
+
+---
+
+## Outlier Handling
+
+Used **Interquartile Range (IQR)** method with capping (Winsorization) to reduce extreme spikes while preserving time series continuity.
+
+### Why Important?
+
+Outliers can distort forecasting models like ARIMA and reduce accuracy.
+
+---
+
+## Stationarity Test
+
+Performed **Augmented Dickey-Fuller (ADF) Test**
+
+### Result:
+
+- p-value < 0.05  
+- Monthly demand series found to be stationary  
+
+This justified use of ARIMA modeling.
 
 ---
 
 ## Models Used
 
-* Exponential Smoothing
-* ARIMA (Final Selected Model)
+### 1. ARIMA (Final Selected Model)
+
+Used for capturing trend and time dependency in demand data.
+
+### 2. Exponential Smoothing
+
+Used as benchmark model for comparison.
 
 ---
 
-## Evaluation Metrics
+## Model Performance
 
-* MAE (Mean Absolute Error)
-* RMSE (Root Mean Squared Error)
-* MAPE (Mean Absolute Percentage Error)
-
-### Model Performance
-
-| Model                 | MAE (Million) | RMSE (Million) |   MAPE |
-| --------------------- | ------------: | -------------: | -----: |
-| ARIMA                 |         24.44 |          25.40 | 11.86% |
-| Exponential Smoothing |         30.70 |          36.32 | 14.55% |
-
-### Final Model Selection
-
-ARIMA outperformed Exponential Smoothing and was selected as the final forecasting model.
+| Model | MAE (Million) | RMSE (Million) | MAPE |
+|------|---------------|----------------|------|
+| ARIMA | 19.95 | 21.96 | 11.01% |
+| Exp Smoothing | 26.21 | 31.63 | 14.47% |
 
 ---
 
-## Forecast Output
+## Final Model Selection
 
-Next 3 Months Predicted Demand:
-
-| Month   | Forecast Demand (Million) |
-| ------- | ------------------------: |
-| 2012-11 |                    200.40 |
-| 2012-12 |                    200.14 |
-| 2013-01 |                    200.15 |
+ARIMA outperformed Exponential Smoothing across all evaluation metrics and was selected as the final forecasting model.
 
 ---
 
-## Key Insights
+## Future Demand Forecast (Next 3 Months)
 
-* Dealer demand remained stable in the short-term forecast horizon.
-* ARIMA produced more accurate forecasts than Exponential Smoothing.
-* Forecasting can reduce stock shortages and excess inventory.
-* Seasonal demand spikes require proactive stock planning.
-* Forecast dashboards can improve management decisions.
+| Month | Forecast Demand (Million) |
+|------|----------------------------|
+| Month 1 | Predicted |
+| Month 2 | Predicted |
+| Month 3 | Predicted |
+
+*(Generated dynamically in notebook output)*
+
+---
+
+## Key Business Insights
+
+- Demand is relatively stable with occasional spikes  
+- Outlier treatment improved model accuracy significantly  
+- ARIMA captured trend better than smoothing methods  
+- Category A dealers require priority stock planning  
+- Seasonal demand peaks need proactive allocation  
 
 ---
 
@@ -134,31 +182,48 @@ Next 3 Months Predicted Demand:
 
 ### Inventory Planning
 
-Increase stock allocation for high-demand dealers before seasonal peaks.
+Maintain safety stock above forecast demand.
 
-### Supply Chain Optimization
+### Production Planning
 
-Use rolling forecasts for transport and warehouse planning.
+Use rolling 3-month forecasts for plant scheduling.
+
+### Logistics Optimization
+
+Allocate transport capacity based on predicted regional demand.
 
 ### Dealer Strategy
 
-Prioritize stock movement toward top-performing dealers.
+Prioritize high-volume dealers for faster replenishment.
 
-### Decision Support
+### Reporting
 
-Use monthly forecasting dashboards for proactive planning.
+Deploy monthly forecasting dashboards for management review.
 
 ---
 
 ## Final Conclusion
 
-This project successfully developed an end-to-end dealer demand forecasting pipeline using ARIMA and time series analytics. The solution can support dealer allocation, inventory planning, and supply chain efficiency in commercial vehicle businesses.
+This project successfully developed a complete **Commercial Vehicle Dealer Demand Forecasting pipeline** using Python and ARIMA. By combining data transformation, outlier treatment, stationarity testing, and forecasting analytics, the solution supports smarter inventory planning, lower costs, and improved supply chain efficiency.
 
+---
+
+## Files in Repository
+
+- `dealer_demand_forecasting.ipynb`
+- `dealer_demand_forecasting.py`
+- `train.csv`
+- `stores.csv`
+- `features.csv`
+- `demand_forecast_model.pkl`
 
 ---
 
 ## Author
 
-Milan Kumar Suthar
+**Milan Kumar Suthar**
+
+- MSc Statistics & Computing, BHU  
+- Data Analytics | Machine Learning | Forecasting | Supply Chain Analytics
 
 ---
