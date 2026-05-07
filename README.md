@@ -1,32 +1,23 @@
 # 🚛 Commercial Vehicle Dealer Demand Forecasting
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Model-ARIMA-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Model-ARIMA(1,1,1)-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Language-Python_3-yellow?style=for-the-badge&logo=python" />
   <img src="https://img.shields.io/badge/Platform-Google_Colab-orange?style=for-the-badge&logo=googlecolab" />
-  <img src="https://img.shields.io/badge/Domain-Supply_Chain_Analytics-green?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/MAPE-11.01%25-success?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/MAPE-12.38%25-brightgreen?style=for-the-badge" />
 </p>
 
-<p align="center">
-  An end-to-end time series forecasting pipeline that predicts monthly dealer demand for a commercial vehicle distribution network — enabling smarter inventory planning, leaner supply chains, and proactive production scheduling.
-</p>
+> End-to-end time series forecasting pipeline that predicts monthly dealer demand across a commercial vehicle distribution network — enabling smarter inventory planning, leaner supply chains, and proactive production scheduling.
 
 ---
 
 ## 📌 Table of Contents
-
 - [Business Problem](#-business-problem)
-- [Project Objective](#-project-objective)
 - [Dataset](#-dataset)
-- [Tech Stack](#-tech-stack)
-- [Project Workflow](#-project-workflow)
-- [Exploratory Data Analysis](#-exploratory-data-analysis)
-- [Outlier Treatment](#-outlier-treatment)
-- [Stationarity Test](#-stationarity-test)
-- [Model Development & Evaluation](#-model-development--evaluation)
-- [Future Demand Forecast](#-future-demand-forecast)
-- [Business Insights & Recommendations](#-business-insights--recommendations)
+- [Project Pipeline](#-project-pipeline)
+- [Key Results](#-key-results)
+- [Forecast Output](#-forecast-output)
+- [Business Recommendations](#-business-recommendations)
 - [Repository Structure](#-repository-structure)
 - [Author](#-author)
 
@@ -34,213 +25,102 @@
 
 ## 🔴 Business Problem
 
-Large commercial vehicle companies managing dealer networks face a persistent challenge: **demand uncertainty**. Without accurate forecasts, the entire supply chain suffers:
+Poor demand forecasting in dealer networks causes:
 
-| Pain Point | Business Impact |
+| Problem | Impact |
 |---|---|
 | Overstocking | High capital lock-up & holding costs |
 | Understocking | Lost sales & dealer dissatisfaction |
-| Poor logistics planning | Dispatch delays & fulfillment failures |
 | Reactive production | Bullwhip effect across the supply chain |
-| Weak dealer allocation | Revenue leakage at high-volume touchpoints |
+| Weak allocation | Revenue leakage at high-volume dealers |
 
----
-
-## 🎯 Project Objective
-
-Build a production-grade, data-driven forecasting system that predicts **monthly dealer-level demand** and directly supports:
-
-- ✅ Inventory Planning & Safety Stock Calculation
-- ✅ Dealer Stock Allocation by Category
-- ✅ Supply Chain Optimization
-- ✅ Rolling Production Scheduling
-- ✅ Management-Level Demand Dashboards
+**Goal:** Predict monthly dealer demand 3 months ahead to support inventory planning, stock allocation, and production scheduling.
 
 ---
 
 ## 📦 Dataset
 
-**Source:** [Walmart Store Sales Forecasting Dataset (Kaggle)](https://www.kaggle.com/c/walmart-recruiting-store-sales-forecasting)
+**Source:** [Walmart Store Sales Forecasting — Kaggle](https://www.kaggle.com/c/walmart-recruiting-store-sales-forecasting), adapted to a commercial vehicle business context.
 
-The raw retail dataset was restructured into a **Commercial Vehicle Dealer Demand** business context:
-
-| Original Column | Business Interpretation | Description |
-|---|---|---|
-| `Store` | `Dealer_ID` | Unique dealer in the network |
-| `Dept` | `Vehicle_Segment` | e.g., Heavy Duty, Light Commercial |
-| `Weekly_Sales` | `Demand_Units` | Units demanded per week |
-| `Type` | `Dealer_Category` | Dealer tier (A / B / C) |
-| `Size` | `Dealer_Capacity` | Maximum throughput capacity |
-| `IsHoliday` | `Seasonal_Indicator` | Seasonal demand flag |
-
-### Files Used
-```
-train.csv       → Historical weekly demand by dealer & segment
-stores.csv      → Dealer metadata (category & capacity)
-features.csv    → Macroeconomic & promotional features
-```
-
----
-
-## 🛠 Tech Stack
-
-```python
-pandas          # Data wrangling & time series manipulation
-numpy           # Numerical operations
-matplotlib      # Trend & forecast visualization
-seaborn         # Statistical plots & EDA
-statsmodels     # ARIMA, Exponential Smoothing, ADF Test
-scikit-learn    # Evaluation metrics (MAE, RMSE, MAPE)
-joblib          # Model serialization & deployment
-```
-
----
-
-## 🔄 Project Workflow
-
-```
-Data Loading
-    │
-    ▼
-Merging (train + stores + features)
-    │
-    ▼
-Business Transformation (Column Renaming)
-    │
-    ▼
-Data Cleaning (Interpolation → ffill → bfill → fillna)
-    │
-    ▼
-Exploratory Data Analysis
-    │
-    ▼
-Outlier Detection & Capping (IQR / Winsorization)
-    │
-    ▼
-Monthly Aggregation (Weekly → Monthly Demand)
-    │
-    ▼
-Stationarity Test (ADF Test)
-    │
-    ▼
-Train-Test Split (Last 6 months held out)
-    │
-    ▼
-Model Training (ARIMA vs. Exponential Smoothing)
-    │
-    ▼
-Model Evaluation (MAE, RMSE, MAPE)
-    │
-    ▼
-Final Forecast — Next 3 Months
-    │
-    ▼
-Business Insights & Deployment
-```
-
----
-
-## 📊 Exploratory Data Analysis
-
-Key analyses performed across the dealer dataset:
-
-- **Demand Trend Analysis** — Total monthly demand plotted over time to identify growth/decline phases
-- **Dealer Category Breakdown** — Boxplot comparison across Category A/B/C dealers
-- **Seasonal Pattern Detection** — Correlation between `Seasonal_Indicator` and demand spikes
-- **Distribution Analysis** — Right-skewed demand distribution with significant outlier presence
-
-### Key Findings
-
-> - Demand remained **broadly stable** with periodic, event-driven spikes
-> - **Category A dealers** consistently handled the largest share of demand volumes
-> - **Seasonal events** triggered measurable surges requiring pre-positioned inventory
-> - Demand distribution exhibited **right-skewness**, confirming the need for outlier treatment before modeling
-
----
-
-## 🔍 Outlier Treatment
-
-**Method:** Interquartile Range (IQR) with Winsorization (Capping)
-
-```python
-Q1 = data['Demand_Units'].quantile(0.25)
-Q3 = data['Demand_Units'].quantile(0.75)
-IQR = Q3 - Q1
-upper_bound = Q3 + 1.5 * IQR   # ≈ 49,227 units
-
-data['Demand_Units'] = np.clip(data['Demand_Units'], lower_bound, upper_bound)
-```
-
-**Why this matters for ARIMA:**
-ARIMA estimates autoregressive parameters from historical variance. Extreme spikes inflate these parameters, causing the model to over-forecast future demand. Capping retains the business signal while eliminating statistical noise — resulting in a more stable, deployment-ready model.
-
----
-
-## 📉 Stationarity Test
-
-**Test Used:** Augmented Dickey-Fuller (ADF)
-
-| Parameter | Result |
+| Original Column | Business Mapping |
 |---|---|
-| ADF Statistic | Significant |
-| p-value | < 0.05 |
-| Conclusion | ✅ Series is **stationary** — suitable for ARIMA without additional differencing |
+| `Store` | `Dealer_ID` |
+| `Dept` | `Vehicle_Segment` |
+| `Weekly_Sales` | `Demand_Units` |
+| `Type` | `Dealer_Category` |
+| `Size` | `Dealer_Capacity` |
+| `IsHoliday` | `Seasonal_Indicator` |
+
+**Dataset sizes after loading:**
+- `train.csv` → 70,562 rows × 5 cols
+- `stores.csv` → 45 rows × 3 cols
+- `features.csv` → 8,190 rows × 12 cols
 
 ---
 
-## 🤖 Model Development & Evaluation
+## 🔄 Project Pipeline
 
-Two models were trained and evaluated on the final 6 months of held-out data:
+```
+1. Load & Merge          train + stores + features → unified dataset
+2. Business Transform    Rename columns to CV domain context
+3. Data Cleaning         Interpolate → ffill → bfill → fillna(0) → 0 nulls, 0 duplicates
+4. EDA                   Demand trend, dealer category boxplot, seasonal patterns
+5. Outlier Treatment     IQR Winsorization → capped at 49,226.87 units
+6. Monthly Aggregation   Weekly → Monthly resampling (33 total data points)
+7. Stationarity Test     ADF: statistic = -6.73, p = 3.4e-09 → ✅ Stationary
+8. Train/Test Split      27 months train (Feb 2010 – Apr 2012) | 6 months test (May – Oct 2012)
+9. Model Training        ARIMA(1,1,1) vs Holt-Winters Exponential Smoothing
+10. Evaluation           MAE, RMSE, MAPE on held-out test set
+11. Final Forecast       Retrain on full data → 3-month outlook
+```
 
-### ARIMA (1, 1, 1)
-Captures autoregressive trend and moving average components with one degree of differencing.
+---
 
-### Exponential Smoothing (Holt-Winters — Additive)
-Triple smoothing with additive seasonality over 12-period cycles. Used as a benchmark.
+## 📊 Key Results
 
-### Performance Comparison
+### Model Comparison
 
-| Model | MAE | RMSE | MAPE | Selected |
+| Model | MAE | RMSE | MAPE | Winner |
 |---|---|---|---|---|
-| **ARIMA (1,1,1)** | **19.95M** | **21.96M** | **11.01%** | ✅ **Yes** |
-| Exponential Smoothing | 26.21M | 31.63M | 14.47% | ❌ No |
+| **ARIMA (1,1,1)** | **3.90M** | **4.07M** | **12.38%** | ✅ |
+| Exponential Smoothing | 5.04M | 5.84M | 15.65% | ❌ |
 
-> **ARIMA outperformed Exponential Smoothing across all three metrics**, delivering ~24% lower MAE and a 3.5 percentage point improvement in MAPE. A MAPE of 11.01% represents a reliable baseline for monthly operational planning.
+ARIMA outperformed Exponential Smoothing on all metrics — **23% lower MAE** and **3.27 pp lower MAPE** — and was selected as the final forecasting model.
 
----
+### Stationarity Test (ADF)
+- **ADF Statistic:** −6.7253
+- **p-value:** 3.40 × 10⁻⁹ *(well below 0.05)*
+- **Result:** Series is stationary → ARIMA applicable without additional differencing
 
-## 📅 Future Demand Forecast
-
-ARIMA was re-fitted on the **full dataset** to maximize signal before forecasting:
-
-| Month | Forecasted Demand | 95% Confidence Interval |
-|---|---|---|
-| Month 1 (Next) | *(Generated in notebook)* | Lower CI — Upper CI |
-| Month 2 | *(Generated in notebook)* | Lower CI — Upper CI |
-| Month 3 | *(Generated in notebook)* | Lower CI — Upper CI |
-
-> 💡 Run `dealer_demand_forecasting.ipynb` to generate live forecast values with confidence bands.
+### Outlier Treatment
+- Upper cap applied at **49,226.87 units** (1.5× IQR)
+- Eliminated extreme spikes that would inflate ARIMA parameters and over-forecast future demand
 
 ---
 
-## 💡 Business Insights & Recommendations
+## 📅 Forecast Output
 
-### Key Insights
+ARIMA(1,1,1) retrained on the full 33-month series. **Next quarter forecast:**
 
-1. **Seasonality Drives Spikes** — Demand surges align with `Seasonal_Indicator` periods; inventory must be pre-positioned at least 4 weeks in advance.
-2. **Outlier Treatment is Non-Negotiable** — Capping reduced MAPE by an estimated 15–20%, proving that clean data quality directly drives forecast accuracy.
-3. **Category A Dealers Dominate Volume** — Disproportionate share of total demand requires dedicated allocation logic for top-tier dealers.
-4. **Stable Baseline** — After treatment and modeling, the demand series is predictable enough to support monthly planning cycles.
+| Month | Forecasted Demand | Lower CI (95%) | Upper CI (95%) |
+|---|---|---|---|
+| Nov 2012 | ~30.43M units | ~20.79M | ~40.59M |
+| Dec 2012 | ~30.26M units | ~20.34M | ~40.18M |
+| Jan 2013 | ~30.27M units | ~19.95M | ~40.07M |
 
-### Strategic Recommendations
+> ⚠️ The wide confidence interval reflects limited training data (33 months). Safety stock buffers are recommended to account for this range.
+
+---
+
+## 💡 Business Recommendations
 
 | Area | Recommendation |
 |---|---|
-| **Inventory Planning** | Maintain **15% safety stock** above the monthly ARIMA forecast to account for 95% CI variance |
-| **Production Planning** | Use **rolling 3-month forecasts** for plant scheduling; re-run model monthly as new data arrives |
-| **Logistics Optimization** | Allocate transport capacity based on predicted regional demand, not historical averages |
-| **Dealer Strategy** | Prioritize **Category A dealers** for early fulfillment during seasonal surges to protect revenue |
-| **Reporting** | Deploy monthly forecasting dashboards for supply chain and management visibility |
+| **Inventory** | Maintain **15% safety stock** above monthly ARIMA forecast to cover CI variance |
+| **Production** | Use **rolling 3-month forecasts** for plant scheduling; refresh monthly |
+| **Logistics** | Pre-position stock at least **4 weeks before** seasonal indicator periods |
+| **Dealer Strategy** | Prioritize **Category A dealers** for early fulfillment during demand surges |
+| **Reporting** | Deploy monthly forecasting dashboards for supply chain visibility |
 
 ---
 
@@ -248,16 +128,12 @@ ARIMA was re-fitted on the **full dataset** to maximize signal before forecastin
 
 ```
 dealer-demand-forecasting/
-│
-├── dealer_demand_forecasting.ipynb   # Main notebook (EDA → Model → Forecast)
-├── dealer_demand_forecasting.py      # Python script version
-│
-├── data/
-│   ├── train.csv                     # Historical weekly demand
-│   ├── stores.csv                    # Dealer metadata
-│   └── features.csv                 # Macroeconomic & promotional features
-│
-├── demand_forecast_model.pkl         # Serialized model for deployment
+├── dealer_demand_forecasting.ipynb   # Full pipeline: EDA → Model → Forecast
+├── dealer_demand_forecasting.py      # Script version
+├── demand_forecast_model.pkl         # Serialized model (Exponential Smoothing)
+├── train.csv                         # Historical weekly demand (70,562 records)
+├── stores.csv                        # Dealer metadata (45 dealers)
+├── features.csv                      # Macro & promotional features
 └── README.md
 ```
 
@@ -265,18 +141,8 @@ dealer-demand-forecasting/
 
 ## 👤 Author
 
-**Milan Kumar Suthar**
+**Milan Kumar Suthar** — MSc Statistics & Computing, BHU
 
-MSc Statistics & Computing — Banaras Hindu University (BHU)
+*Data Analytics · Machine Learning · Time Series Forecasting · Supply Chain Analytics*
 
-*Specializations: Data Analytics · Machine Learning · Time Series Forecasting · Supply Chain Analytics*
-
-<p>
-  <a href="https://github.com/MIlanSuthar24"><img src="https://img.shields.io/badge/GitHub-MIlanSuthar24-181717?style=flat&logo=github" /></a>
-</p>
-
----
-
-<p align="center">
-  <i>Built to reduce capital lock-up, prevent stock-outs, and bring data-driven precision to commercial vehicle supply chains.</i>
-</p>
+[![GitHub](https://img.shields.io/badge/GitHub-MIlanSuthar24-181717?style=flat&logo=github)](https://github.com/MIlanSuthar24)
